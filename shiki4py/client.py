@@ -88,7 +88,8 @@ class Client:
             return None
 
         try:
-            data = r.json()
+            if len(r.text) > 0:
+                data = r.json()
         except JSONDecodeError:
             self.lm.requestError(r)
             print(f"JSONDecodeError. Check the logs.")

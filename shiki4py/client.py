@@ -1,27 +1,20 @@
-from .configmanager import ConfigManager
+from .tokensmanager import TokensManager
 from .logmanager import LogManager
-import json
 from datetime import datetime as dt
-from requests import RequestException, JSONDecodeError
-from requests_ratelimiter import LimiterSession
+from requests import RequestException, HTTPError, JSONDecodeError
+from requests_ratelimiter import LimiterSession, Limiter, RequestRate
 
 
 class Client:
     RPS = 5
     RPM = 90
 
-    def __init__(self, app_name, client_id=None, client_secret=None,
-                 api_endpoint='https://shikimori.one/api/',
-                 token_endpoint='https://shikimori.one/oauth/token',
-                 redirect_uri='urn:ietf:wg:oauth:2.0:oob'):
+    comments_limiter = Limiter(RequestRate(1, 4))
 
+    def __init__(self, app_name, api_endpoint='https://shikimori.one/api/'):
         self.api_endpoint = api_endpoint
-        self.token_endpoint = token_endpoint
-
         self.app_name = app_name
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.redirect_uri = redirect_uri
+        self.isAuth = False
 
         self.lm = LogManager()
 
@@ -31,16 +24,24 @@ class Client:
 
         self.session = LimiterSession(per_second=self.RPS, per_minute=self.RPM)
         self.session.headers.update(self.headers)
+    
+    def auth(self, client_id, client_secret,
+             token_endpoint='https://shikimori.one/oauth/token',
+             redirect_uri='urn:ietf:wg:oauth:2.0:oob'):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.token_endpoint = token_endpoint
+        self.redirect_uri = redirect_uri
+        self.tm = TokensManager(client_id)
 
-        self.token = None
-        if self.client_id is not None and self.client_secret is not None:
-            self.cm = ConfigManager(self.client_id)
-            config_section = self.cm.get()
-            if config_section is None:
-                self._getAccessToken()
-            else:
-                self.token = json.loads(config_section['token'])
-            self._applyAccessToken()
+        token = self.tm.get()
+        if len(token) > 0:
+            self._applyAccessToken(token)
+        else:
+            self._getAccessToken()
+        self.isAuth = True
+
+        return self
 
     def _getAccessToken(self):
         code = input('Введи код авторизации (Authorization Code): ')
@@ -52,52 +53,51 @@ class Client:
             'code': code,
             'redirect_uri': self.redirect_uri
         }
-        r = self._request('post', self.token_endpoint, data=data)
-        self.token = r
-        self.cm.add(json.dumps(self.token))
+        token = self._request('post', self.token_endpoint, data=data)
+        self.tm.set(token)
+        self._applyAccessToken(token)
 
     def _refreshAccessToken(self):
+        old_token = self.tm.get()
         data = {
             'grant_type': 'refresh_token',
             'client_id': self.client_id,
             'client_secret': self.client_secret,
-            'refresh_token': self.token['refresh_token']
+            'refresh_token': old_token['refresh_token']
         }
         self.session.headers.pop('Authorization')
-        data = self._request('post', self.token_endpoint, data=data)
-        if data is not None:
-            self.token = data
-            self.cm.update('token', json.dumps(self.token))
-            self._applyAccessToken()
+        new_token = self._request('post', self.token_endpoint, data=data)
+        self.tm.set(new_token)
+        self._applyAccessToken(new_token)
 
-    def _applyAccessToken(self):
-        self.headers['Authorization'] = f"{self.token['token_type']} {self.token['access_token']}"
+    def _applyAccessToken(self, token):
+        self.headers['Authorization'] = f"{token['token_type']} {token['access_token']}"
         self.session.headers.update(self.headers)
+
+    def _checkAccessToken(self):
+        token = self.tm.get()
+        return dt.now() > dt.fromtimestamp(token['created_at'] + token['expires_in'])
 
     def _request(self, method, url, **kwargs):
         try:
             r = self.session.request(method, url, **kwargs)
-        except RequestException:
+            r.raise_for_status()
+        except (RequestException, HTTPError):
             self.lm.requestError(r)
-            print('Request error. Check the logs.')
+            print(f"Request error: {r.status_code} {r.reason}. Check the logs.")
             return None
 
         try:
             data = r.json()
         except JSONDecodeError:
-            return None
-
-        if 'error' in data:
             self.lm.requestError(r)
-            print(f"Shikimori API error: {data['error']}. Check the logs.")
-        elif 'errors' in data:
-            self.lm.requestError(r)
-            print(f"Shikimori API error: {data['errors']}. Check the logs.")
+            print(f"JSONDecodeError. Check the logs.")
+            data = None
 
         return data
 
     def _api_request(self, method, path, **kwargs):
-        if self.token is not None and dt.now() > dt.fromtimestamp(self.token['created_at'] + self.token['expires_in']):
+        if self.isAuth and self._checkAccessToken():
             self._refreshAccessToken()
 
         if method != 'get':
@@ -124,3 +124,17 @@ class Client:
 
     def delete(self, path, **kwargs):
         return self._api_request('delete', path, **kwargs)
+    
+    @comments_limiter.ratelimit('comments_limiter', delay=True)
+    def create_comment(self, body, commentable_id, commentable_type,
+                       broadcast=False, is_offtopic=False):
+        return self.post('comments', json={
+            'broadcast': broadcast,
+            'comment': {
+                'body': body,
+                'commentable_id': commentable_id,
+                'commentable_type': commentable_type,
+                'is_offtopic': is_offtopic
+            },
+            'frontend': False
+        })

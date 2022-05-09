@@ -1,17 +1,17 @@
 # Shiki4py
 
-Тестовая версия клиента для api Shikimori.
+Клиент для api Shikimori.
 
 Реализовано:
 * Поддержка api v1 и v2
 * Ограничения 5rps и 90rpm
 * Логирование ошибок
-* OAuth2 авторизация (Будет обновлено)
-* Сохранение токенов (Будет обновлено)
-* Авто обновление токена доступа
+* OAuth2 авторизация
+* Сохранение токенов
+* Автообновление токена доступа
+* Функция безопасного создания комментариев
 
 В планах:
-* Безопасное создание комментариев
 * Debug логирование
 * Вспомогательные функции
 
@@ -38,7 +38,7 @@ CLIENT_SECRET = 'CLIENT_SECRET'
 # Клиент без авторизации
 client = Client(APP_NAME)
 # Клиент с авторизацией
-client = Client(APP_NAME, CLIENT_ID, CLIENT_SECRET)
+client = Client(APP_NAME).auth(CLIENT_ID, CLIENT_SECRET)
 
 clubs = client.get('clubs', params={
     'search': 'Детектив Конан'

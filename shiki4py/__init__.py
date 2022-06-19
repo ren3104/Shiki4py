@@ -1,4 +1,4 @@
-from .client import Client
+from shiki4py.client import Client
 
 
 __all__ = ['Client']

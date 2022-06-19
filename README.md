@@ -1,30 +1,23 @@
 # Shiki4py
+[![PyPI](https://img.shields.io/pypi/v/shiki4py?color=blue)](https://pypi.org/project/shiki4py)
 
 Клиент для api Shikimori.
 
-Реализовано:
+Мой профиль на шики https://shikimori.one/Ren3104
+
+## Особенности
 * Поддержка api v1 и v2
 * Ограничения 5rps и 90rpm
-* Логирование ошибок
+* Система логирования
 * OAuth2 авторизация
-* Сохранение токенов
-* Автообновление токена доступа
 * Функция безопасного создания комментариев
 
-В планах:
-* Debug логирование
-* Вспомогательные функции
-
-Мой профиль на шики https://shikimori.one/3104
-
 ## Установка
-
 ```bash
 pip install shiki4py
 ```
 
 ## Использование
-
 ```python
 from shiki4py import Client
 from pprint import pprint
@@ -38,7 +31,7 @@ CLIENT_SECRET = 'CLIENT_SECRET'
 # Клиент без авторизации
 client = Client(APP_NAME)
 # Клиент с авторизацией
-client = Client(APP_NAME).auth(CLIENT_ID, CLIENT_SECRET)
+client = Client(APP_NAME, CLIENT_ID, CLIENT_SECRET)
 
 clubs = client.get('clubs', params={
     'search': 'Детектив Конан'
@@ -56,3 +49,7 @@ pprint(clubs)
 #            'x96': '/system/clubs/x96/3483.gif?1637694999'},
 #   'name': 'Детектив Конан'}]
 ```
+
+## Зависимости
+* [requests](https://github.com/psf/requests) - для HTTP запросов
+* [requests-ratelimiter](https://github.com/JWCook/requests-ratelimiter) - для ограничения количества запросов

@@ -130,4 +130,4 @@ dmypy.json
 
 # My
 test.py
-tokens.ini
+*.shiki4py.*

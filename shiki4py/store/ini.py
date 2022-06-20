@@ -18,5 +18,5 @@ class INITokenStore(BaseTokenStore):
 
     def fetch(self, client_id):
         if self._config.has_section(client_id):
-            return self._config.items(client_id)
+            return dict(self._config.items(client_id))
         return None

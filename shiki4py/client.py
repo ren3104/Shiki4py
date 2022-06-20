@@ -1,7 +1,7 @@
 from shiki4py.store.ini import INITokenStore
 from shiki4py.log import LogManager
 from datetime import datetime as dt
-from requests import RequestException, HTTPError, JSONDecodeError
+from requests import RequestException, JSONDecodeError
 from requests_ratelimiter import LimiterSession, Limiter, RequestRate
 
 
@@ -24,15 +24,6 @@ class Client:
         self._client_id = client_id
         self._client_secret = client_secret
 
-        if self._client_id and self._client_secret:
-            self._store = store
-
-            token = self._store.fetch(self._client_id)
-            if token is None:
-                self._getAccessToken()
-            else:
-                self._applyAccessToken(token)
-
         self._log_manager = LogManager(debug, console)
 
         self._headers = {
@@ -42,9 +33,17 @@ class Client:
         self._session = LimiterSession(per_second=self.RPS, per_minute=self.RPM)
         self._session.headers.update(self._headers)
 
+        if self._client_id and self._client_secret:
+            self._store = store
+
+            token = self._store.fetch(self._client_id)
+            if token is None:
+                self._getAccessToken()
+            else:
+                self._applyAccessToken(token)
+
     def _getAccessToken(self):
         code = input('Введи код авторизации (Authorization Code): ')
-
         data = {
             'grant_type': 'authorization_code',
             'client_id': self._client_id,
@@ -53,6 +52,7 @@ class Client:
             'redirect_uri': self._redirect_uri
         }
         token = self._request('post', self._token_endpoint, data=data)
+
         self._store.save(self._client_id, token)
         self._applyAccessToken(token)
 
@@ -66,6 +66,7 @@ class Client:
         }
         self._session.headers.pop('Authorization')
         new_token = self._request('post', self._token_endpoint, data=data)
+        
         self._store.save(self._client_id, new_token)
         self._applyAccessToken(new_token)
 
@@ -84,9 +85,9 @@ class Client:
         try:
             r = self._session.request(method, url, **kwargs)
             r.raise_for_status()
-        except (RequestException, HTTPError):
+        except RequestException as e:
             self._log_manager.requestError(r)
-            return None
+            raise e
 
         try:
             data = r.json()

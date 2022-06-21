@@ -1,5 +1,7 @@
+from shiki4py.store import BaseTokenStore
 from shiki4py.store.ini import INITokenStore
 from shiki4py.log import LogManager
+from typing import Any, Dict, Type, Optional, Union
 from datetime import datetime as dt
 from requests import RequestException, JSONDecodeError
 from requests_ratelimiter import LimiterSession, Limiter, RequestRate
@@ -11,11 +13,11 @@ class Client:
 
     _comments_limiter = Limiter(RequestRate(1, 4))
 
-    def __init__(self, app_name, client_id=None, client_secret=None,
-                 debug=False, console=False, store=INITokenStore(),
-                 api_endpoint='https://shikimori.one/api/',
-                 token_endpoint='https://shikimori.one/oauth/token',
-                 redirect_uri='urn:ietf:wg:oauth:2.0:oob'):
+    def __init__(self, app_name: str, client_id: Optional[str] = None, client_secret: Optional[str] = None,
+                 debug: bool = False, console: bool = False, store: Type[BaseTokenStore] = INITokenStore(),
+                 api_endpoint: str = 'https://shikimori.one/api/',
+                 token_endpoint: str = 'https://shikimori.one/oauth/token',
+                 redirect_uri: str = 'urn:ietf:wg:oauth:2.0:oob') -> None:
         self._api_endpoint = api_endpoint
         self._token_endpoint = token_endpoint
         self._redirect_uri = redirect_uri
@@ -30,7 +32,8 @@ class Client:
             'User-Agent': self._app_name
         }
 
-        self._session = LimiterSession(per_second=self.RPS, per_minute=self.RPM)
+        self._session = LimiterSession(per_second=self.RPS,
+                                       per_minute=self.RPM)
         self._session.headers.update(self._headers)
 
         if self._client_id and self._client_secret:
@@ -42,7 +45,7 @@ class Client:
             else:
                 self._applyAccessToken(token)
 
-    def _getAccessToken(self):
+    def _getAccessToken(self) -> None:
         code = input('Введи код авторизации (Authorization Code): ')
         data = {
             'grant_type': 'authorization_code',
@@ -56,7 +59,7 @@ class Client:
         self._store.save(self._client_id, token)
         self._applyAccessToken(token)
 
-    def _refreshAccessToken(self):
+    def _refreshAccessToken(self) -> None:
         old_token = self._store.fetch(self._client_id)
         data = {
             'grant_type': 'refresh_token',
@@ -66,22 +69,22 @@ class Client:
         }
         self._session.headers.pop('Authorization')
         new_token = self._request('post', self._token_endpoint, data=data)
-        
+
         self._store.save(self._client_id, new_token)
         self._applyAccessToken(new_token)
 
-    def _applyAccessToken(self, token):
+    def _applyAccessToken(self, token: Dict[str, Any]) -> None:
         self._headers['Authorization'] = f"{token['token_type']} {token['access_token']}"
         self._session.headers.update(self._headers)
 
-    def _checkAccessToken(self):
+    def _checkAccessToken(self) -> bool:
         if self._client_id and self._client_secret:
             token = self._store.fetch(self._client_id)
             if token is not None:
                 return dt.now() > dt.fromtimestamp(int(token['created_at']) + int(token['expires_in']))
         return False
 
-    def _request(self, method, url, **kwargs):
+    def _request(self, method: str, url: str, **kwargs) -> Union[Dict[str, Any], str]:
         try:
             r = self._session.request(method, url, **kwargs)
             r.raise_for_status()
@@ -96,7 +99,7 @@ class Client:
 
         return data
 
-    def _api_request(self, method, path, **kwargs):
+    def _api_request(self, method: str, path: str, **kwargs) -> Union[Dict[str, Any], str]:
         if self._checkAccessToken():
             self._refreshAccessToken()
 
@@ -106,28 +109,29 @@ class Client:
         url = self._api_endpoint + path
         return self._request(method, url, **kwargs)
 
-    def get(self, path, params=None, **kwargs):
+    def get(self, path: str, params: Optional[Dict[str, Any]] = None, **kwargs) -> Union[Dict[str, Any], str]:
         kwargs.update({'params': params})
         return self._api_request('get', path, **kwargs)
 
-    def post(self, path, json, **kwargs):
+    def post(self, path: str, json: Dict[str, Any], **kwargs) -> Union[Dict[str, Any], str]:
         kwargs.update({'json': json})
         return self._api_request('post', path, **kwargs)
 
-    def put(self, path, json, **kwargs):
+    def put(self, path: str, json: Dict[str, Any], **kwargs) -> Union[Dict[str, Any], str]:
         kwargs.update({'json': json})
         return self._api_request('put', path, **kwargs)
 
-    def patch(self, path, json, **kwargs):
+    def patch(self, path: str, json: Dict[str, Any], **kwargs) -> Union[Dict[str, Any], str]:
         kwargs.update({'json': json})
         return self._api_request('patch', path, **kwargs)
 
-    def delete(self, path, **kwargs):
+    def delete(self, path: str, **kwargs) -> Union[Dict[str, Any], str]:
         return self._api_request('delete', path, **kwargs)
 
     @_comments_limiter.ratelimit('comments_limiter', delay=True)
-    def create_comment(self, body, commentable_id, commentable_type,
-                       broadcast=False, is_offtopic=False, frontend=False):
+    def create_comment(self, body: str, commentable_id: Union[str, int], commentable_type: str,
+                       broadcast: bool = False, is_offtopic: bool = False,
+                       frontend: bool = False) -> Union[Dict[str, Any], str]:
         return self.post('comments', json={
             'broadcast': broadcast,
             'comment': {

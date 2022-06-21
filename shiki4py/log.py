@@ -2,10 +2,12 @@ import logging
 import textwrap
 import sys
 import os.path
+from typing import Dict
+from requests import Response
 
 
 class LogManager:
-    def __init__(self, debug, console):
+    def __init__(self, debug: bool, console: bool) -> None:
         self.logger = logging.getLogger(__name__)
 
         if debug:
@@ -24,10 +26,10 @@ class LogManager:
             console_handler.setFormatter(formatter)
             self.logger.addHandler(console_handler)
 
-    def _formatHeaders(self, d):
+    def _formatHeaders(self, d: Dict[str, str]) -> str:
         return '\n'.join(f'{k}: {v}' for k, v in d.items())
 
-    def requestError(self, response):
+    def requestError(self, response: Response) -> None:
         self.logger.error(textwrap.dedent('''
             ---------------- request ----------------
             {req.method} {req.url}

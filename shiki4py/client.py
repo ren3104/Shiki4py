@@ -1,9 +1,9 @@
 from shiki4py.store import BaseTokenStore
 from shiki4py.store.ini import INITokenStore
 from shiki4py.log import LogManager
-from typing import Any, Dict, Type, Optional, Union
+from typing import Any, Dict, Optional
 from datetime import datetime as dt
-from requests import RequestException, JSONDecodeError
+from requests import RequestException
 from requests_ratelimiter import LimiterSession, Limiter, RequestRate
 
 
@@ -14,7 +14,7 @@ class Client:
     _comments_limiter = Limiter(RequestRate(1, 4))
 
     def __init__(self, app_name: str, client_id: Optional[str] = None, client_secret: Optional[str] = None,
-                 debug: bool = False, console: bool = False, store: Type[BaseTokenStore] = INITokenStore(),
+                 debug: bool = False, console: bool = False, store: BaseTokenStore = INITokenStore(),
                  api_endpoint: str = 'https://shikimori.one/api/',
                  token_endpoint: str = 'https://shikimori.one/oauth/token',
                  redirect_uri: str = 'urn:ietf:wg:oauth:2.0:oob') -> None:
@@ -23,8 +23,6 @@ class Client:
         self._redirect_uri = redirect_uri
 
         self._app_name = app_name
-        self._client_id = client_id
-        self._client_secret = client_secret
 
         self._log_manager = LogManager(debug, console)
 
@@ -36,7 +34,10 @@ class Client:
                                        per_minute=self.RPM)
         self._session.headers.update(self._headers)
 
-        if self._client_id and self._client_secret:
+        if client_id and client_secret:
+            self._client_id = client_id
+            self._client_secret = client_secret
+
             self._store = store
 
             token = self._store.fetch(self._client_id)
@@ -61,17 +62,18 @@ class Client:
 
     def _refreshAccessToken(self) -> None:
         old_token = self._store.fetch(self._client_id)
-        data = {
-            'grant_type': 'refresh_token',
-            'client_id': self._client_id,
-            'client_secret': self._client_secret,
-            'refresh_token': old_token['refresh_token']
-        }
-        self._session.headers.pop('Authorization')
-        new_token = self._request('post', self._token_endpoint, data=data)
+        if old_token:
+            data = {
+                'grant_type': 'refresh_token',
+                'client_id': self._client_id,
+                'client_secret': self._client_secret,
+                'refresh_token': old_token['refresh_token']
+            }
+            self._session.headers.pop('Authorization')
+            new_token = self._request('post', self._token_endpoint, data=data)
 
-        self._store.save(self._client_id, new_token)
-        self._applyAccessToken(new_token)
+            self._store.save(self._client_id, new_token)
+            self._applyAccessToken(new_token)
 
     def _applyAccessToken(self, token: Dict[str, Any]) -> None:
         self._headers['Authorization'] = f"{token['token_type']} {token['access_token']}"
@@ -84,22 +86,16 @@ class Client:
                 return dt.now() > dt.fromtimestamp(int(token['created_at']) + int(token['expires_in']))
         return False
 
-    def _request(self, method: str, url: str, **kwargs) -> Union[Dict[str, Any], str]:
+    def _request(self, method: str, url: str, **kwargs) -> Dict[str, Any]:
         try:
             r = self._session.request(method, url, **kwargs)
             r.raise_for_status()
         except RequestException as e:
             self._log_manager.requestError(r)
             raise e
+        return r.json()
 
-        try:
-            data = r.json()
-        except JSONDecodeError:
-            data = r.text
-
-        return data
-
-    def _api_request(self, method: str, path: str, **kwargs) -> Union[Dict[str, Any], str]:
+    def _api_request(self, method: str, path: str, **kwargs) -> Dict[str, Any]:
         if self._checkAccessToken():
             self._refreshAccessToken()
 
@@ -109,29 +105,29 @@ class Client:
         url = self._api_endpoint + path
         return self._request(method, url, **kwargs)
 
-    def get(self, path: str, params: Optional[Dict[str, Any]] = None, **kwargs) -> Union[Dict[str, Any], str]:
+    def get(self, path: str, params: Optional[Dict[str, Any]] = None, **kwargs) -> Dict[str, Any]:
         kwargs.update({'params': params})
         return self._api_request('get', path, **kwargs)
 
-    def post(self, path: str, json: Dict[str, Any], **kwargs) -> Union[Dict[str, Any], str]:
+    def post(self, path: str, json: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         kwargs.update({'json': json})
         return self._api_request('post', path, **kwargs)
 
-    def put(self, path: str, json: Dict[str, Any], **kwargs) -> Union[Dict[str, Any], str]:
+    def put(self, path: str, json: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         kwargs.update({'json': json})
         return self._api_request('put', path, **kwargs)
 
-    def patch(self, path: str, json: Dict[str, Any], **kwargs) -> Union[Dict[str, Any], str]:
+    def patch(self, path: str, json: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         kwargs.update({'json': json})
         return self._api_request('patch', path, **kwargs)
 
-    def delete(self, path: str, **kwargs) -> Union[Dict[str, Any], str]:
+    def delete(self, path: str, **kwargs) -> Dict[str, Any]:
         return self._api_request('delete', path, **kwargs)
 
     @_comments_limiter.ratelimit('comments_limiter', delay=True)
-    def create_comment(self, body: str, commentable_id: Union[str, int], commentable_type: str,
+    def create_comment(self, body: str, commentable_id: int, commentable_type: str,
                        broadcast: bool = False, is_offtopic: bool = False,
-                       frontend: bool = False) -> Union[Dict[str, Any], str]:
+                       frontend: bool = False) -> Dict[str, Any]:
         return self.post('comments', json={
             'broadcast': broadcast,
             'comment': {

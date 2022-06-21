@@ -2,7 +2,7 @@ import logging
 import textwrap
 import sys
 import os.path
-from typing import Dict
+from typing import MutableMapping
 from requests import Response
 
 
@@ -26,7 +26,7 @@ class LogManager:
             console_handler.setFormatter(formatter)
             self.logger.addHandler(console_handler)
 
-    def _formatHeaders(self, d: Dict[str, str]) -> str:
+    def _formatHeaders(self, d: MutableMapping) -> str:
         return '\n'.join(f'{k}: {v}' for k, v in d.items())
 
     def requestError(self, response: Response) -> None:

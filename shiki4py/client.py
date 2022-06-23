@@ -13,8 +13,13 @@ class Client:
 
     _comments_limiter = Limiter(RequestRate(1, 4))
 
-    def __init__(self, app_name: str, client_id: Optional[str] = None, client_secret: Optional[str] = None,
-                 debug: bool = False, console: bool = False, store: BaseTokenStore = INITokenStore(),
+    def __init__(self,
+                 app_name: str,
+                 client_id: Optional[str] = None,
+                 client_secret: Optional[str] = None,
+                 debug: bool = False,
+                 console: bool = False,
+                 store: BaseTokenStore = INITokenStore(),
                  api_endpoint: str = 'https://shikimori.one/api/',
                  token_endpoint: str = 'https://shikimori.one/oauth/token',
                  redirect_uri: str = 'urn:ietf:wg:oauth:2.0:oob') -> None:
@@ -125,8 +130,12 @@ class Client:
         return self._api_request('delete', path, **kwargs)
 
     @_comments_limiter.ratelimit('comments_limiter', delay=True)
-    def create_comment(self, body: str, commentable_id: int, commentable_type: str,
-                       broadcast: bool = False, is_offtopic: bool = False,
+    def create_comment(self,
+                       body: str,
+                       commentable_id: int,
+                       commentable_type: str,
+                       broadcast: bool = False,
+                       is_offtopic: bool = False,
                        frontend: bool = False) -> Dict[str, Any]:
         return self.post('comments', json={
             'broadcast': broadcast,

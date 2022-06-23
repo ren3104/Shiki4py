@@ -7,7 +7,7 @@ import os.path
 
 class INITokenStore(BaseTokenStore):
     def __init__(self) -> None:
-        self._file_path = f"{os.path.splitext(os.path.basename(sys.argv[0]))[0]}.shiki4py.ini"
+        self._file_path = f"{os.path.splitext(sys.argv[0])[0]}.shiki4py.ini"
         self._config = configparser.ConfigParser()
 
         if os.path.isfile(self._file_path):

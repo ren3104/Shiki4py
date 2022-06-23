@@ -15,9 +15,11 @@ class LogManager:
         else:
             self.logger.setLevel(logging.ERROR)
 
-        formatter = logging.Formatter('%(asctime)s [%(levelname)s]: %(message)s', '%Y-%m-%d %H:%M:%S')
-        _file_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-        file_handler = logging.FileHandler(filename=f"{_file_name}.shiki4py.log", mode='w')
+        formatter = logging.Formatter('%(asctime)s [%(levelname)s]: %(message)s',
+                                      '%Y-%m-%d %H:%M:%S')
+        file_path = os.path.splitext(sys.argv[0])[0]
+        file_handler = logging.FileHandler(filename=f"{file_path}.shiki4py.log",
+                                           mode='w')
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
 

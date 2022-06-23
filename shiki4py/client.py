@@ -1,5 +1,5 @@
 from shiki4py.store import BaseTokenStore
-from shiki4py.store.ini import INITokenStore
+from shiki4py.store.ini import IniTokenStore
 from shiki4py.log import LogManager
 from typing import Any, Dict, Optional
 from datetime import datetime as dt
@@ -15,11 +15,11 @@ class Client:
 
     def __init__(self,
                  app_name: str,
-                 client_id: Optional[str] = None,
-                 client_secret: Optional[str] = None,
+                 client_id: str = '',
+                 client_secret: str = '',
                  debug: bool = False,
                  console: bool = False,
-                 store: BaseTokenStore = INITokenStore(),
+                 store: BaseTokenStore = IniTokenStore(),
                  api_endpoint: str = 'https://shikimori.one/api/',
                  token_endpoint: str = 'https://shikimori.one/oauth/token',
                  redirect_uri: str = 'urn:ietf:wg:oauth:2.0:oob') -> None:
@@ -28,6 +28,8 @@ class Client:
         self._redirect_uri = redirect_uri
 
         self._app_name = app_name
+        self._client_id = client_id
+        self._client_secret = client_secret
 
         self._log_manager = LogManager(debug, console)
 
@@ -39,10 +41,7 @@ class Client:
                                        per_minute=self.RPM)
         self._session.headers.update(self._headers)
 
-        if client_id and client_secret:
-            self._client_id = client_id
-            self._client_secret = client_secret
-
+        if self._client_id and self._client_secret:
             self._store = store
 
             token = self._store.fetch(self._client_id)

@@ -5,7 +5,7 @@ import sys
 import os.path
 
 
-class INITokenStore(BaseTokenStore):
+class IniTokenStore(BaseTokenStore):
     def __init__(self) -> None:
         self._file_path = f"{os.path.splitext(sys.argv[0])[0]}.shiki4py.ini"
         self._config = configparser.ConfigParser()

@@ -1,9 +1,9 @@
+from typing import MutableMapping
+from requests import Response
 import logging
 import textwrap
 import sys
 import os.path
-from typing import MutableMapping
-from requests import Response
 
 
 class LogManager:
@@ -17,8 +17,8 @@ class LogManager:
 
         formatter = logging.Formatter('%(asctime)s [%(levelname)s]: %(message)s',
                                       '%Y-%m-%d %H:%M:%S')
-        file_path = os.path.splitext(sys.argv[0])[0]
-        file_handler = logging.FileHandler(filename=f"{file_path}.shiki4py.log",
+        file_path = os.path.splitext(os.path.split(sys.argv[0])[1])[0]
+        file_handler = logging.FileHandler(filename=f"{file_path}-shiki4py.log",
                                            mode='w')
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)

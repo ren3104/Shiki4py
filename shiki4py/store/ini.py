@@ -1,13 +1,12 @@
 from shiki4py.store import BaseTokenStore
 from typing import Any, Dict, Optional
 import configparser
-import sys
 import os.path
 
 
 class IniTokenStore(BaseTokenStore):
-    def __init__(self) -> None:
-        self._file_path = f"{os.path.splitext(sys.argv[0])[0]}.shiki4py.ini"
+    def __init__(self, file_path: str = 'tokens') -> None:
+        self._file_path = f"{file_path}-shiki4py.ini"
         self._config = configparser.ConfigParser()
 
         if os.path.isfile(self._file_path):

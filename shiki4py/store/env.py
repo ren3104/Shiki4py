@@ -12,9 +12,9 @@ class EnvTokenStore(BaseTokenStore):
             self._dotenv_file = file_path
 
     def save(self, client_id: str, token: Dict[str, Any]) -> None:
-        return set_key(self._dotenv_file,
-                       client_id,
-                       dumps(token))
+        set_key(self._dotenv_file,
+                client_id,
+                dumps(token))
 
     def fetch(self, client_id: str) -> Optional[Dict[str, Any]]:
         token = DotEnv(self._dotenv_file,

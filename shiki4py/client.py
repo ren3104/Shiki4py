@@ -17,8 +17,7 @@ class Client:
                  app_name: str,
                  client_id: str = '',
                  client_secret: str = '',
-                 debug: bool = False,
-                 console: bool = False,
+                 log: LogManager = LogManager(),
                  store: BaseTokenStore = IniTokenStore(),
                  api_endpoint: str = 'https://shikimori.one/api/',
                  token_endpoint: str = 'https://shikimori.one/oauth/token',
@@ -31,7 +30,7 @@ class Client:
         self._client_id = client_id
         self._client_secret = client_secret
 
-        self._log_manager = LogManager(debug, console)
+        self._log_manager = log
 
         self._headers = {
             'User-Agent': self._app_name

@@ -7,7 +7,9 @@ import os.path
 
 
 class LogManager:
-    def __init__(self, debug: bool, console: bool) -> None:
+    def __init__(self,
+                 debug: bool = False,
+                 console: bool = False) -> None:
         self.logger = logging.getLogger(__name__)
 
         if debug:
@@ -18,7 +20,7 @@ class LogManager:
         formatter = logging.Formatter('%(asctime)s [%(levelname)s]: %(message)s',
                                       '%Y-%m-%d %H:%M:%S')
         file_path = os.path.splitext(os.path.split(sys.argv[0])[1])[0]
-        file_handler = logging.FileHandler(filename=f"{file_path}-shiki4py.log",
+        file_handler = logging.FileHandler(filename=f"shiki4py-{file_path}.log",
                                            mode='w')
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)

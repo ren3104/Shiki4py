@@ -1,16 +1,53 @@
 # Shiki4py
-[![PyPI](https://img.shields.io/pypi/v/shiki4py?color=blue)](https://pypi.org/project/shiki4py)
+[![PyPi Package Version](https://img.shields.io/pypi/v/shiki4py?color=blue)](https://pypi.org/project/shiki4py)
+[![Supported python versions](https://img.shields.io/pypi/pyversions/shiki4py.svg)](https://pypi.org/project/shiki4py)
 
-Клиент для api Shikimori.
+Асинхронный клиент для взаимодействия с [api Shikimori](https://shikimori.one/api/doc/1.0), написанный на Python 3.7 c использованием [asyncio](https://docs.python.org/3/library/asyncio.html) и [aiohttp](https://github.com/aio-libs/aiohttp).
 
-Мой профиль на шики https://shikimori.one/Ren3104
+Версии shiki4py v0.2.2 и раньше являются синхронными, но начиная с v2.0.0 этот пакет стал асинхронным. Рекомендую использовать в своих проектах только shiki4py >= v2.0.0!
+
+Сравнение shiki4py v0.2.2 и v2.0.0 по времени отправки 25 запросов:
+
+<img alt="Image shiki4py sync vs async" src="./assets/sync_vs_async.svg" width="320">
+
+shiki4py v0.2.2 ~10.5 секунд
+<details>
+<summary>Код</summary>
+```python
+from shiki4py import Client
+
+
+client = Client("APP_NAME",
+                "CLIENT_ID",
+                "CLIENT_SECRET")
+for i in range(25):
+    client.get(f"/users/{i}/info")
+```
+</details>
+
+shiki4py v2.0.0 ~5.07 секунд
+<details>
+<summary>Код</summary>
+```python
+from shiki4py import Shikimori
+import asyncio
+
+
+async def main():
+    async with Shikimori("APP_NAME", "CLIENT_ID", "CLIENT_SECRET") as api:
+        await asyncio.gather(*[api.request(f"/api/users/{i}/info") for i in range(25)])
+
+
+asyncio.run(main())
+```
+</details>
 
 ## Особенности
 * Поддержка api v1 и v2
 * Ограничения 5rps и 90rpm
-* Система логирования
 * OAuth2 авторизация
-* Несколько вариантов хранения токенов для авторизации: .ini, .env
+* Контроль срока действия токена
+* Хранение токенов в .env файле
 * Функция безопасного создания комментариев
 
 ## Установка
@@ -19,56 +56,56 @@ pip install shiki4py
 ```
 
 ## Использование
+### Быстрый старт
 ```python
-from shiki4py import Client
-from pprint import pprint
+from shiki4py import Shikimori
+import asyncio
+import logging
 
 
-# Клиент без авторизации
-client = Client('APP_NAME')
-# Клиент с авторизацией
-client = Client('APP_NAME',
-                'CLIENT_ID',
-                'CLIENT_SECRET')
+logging.basicConfig(level=logging.INFO)
 
-clubs = client.get('clubs', params={
-    'search': 'Детектив Конан'
-})
 
-pprint(clubs)
-# [{'comment_policy': 'free',
-#   'id': 3483,
-#   'is_censored': False,
-#   'join_policy': 'free',
-#   'logo': {'main': '/system/clubs/main/3483.gif?1637694999',
-#            'original': '/system/clubs/original/3483.gif?1637694999',
-#            'x48': '/system/clubs/x48/3483.gif?1637694999',
-#            'x73': '/system/clubs/x73/3483.gif?1637694999',
-#            'x96': '/system/clubs/x96/3483.gif?1637694999'},
-#   'name': 'Детектив Конан'}]
+async def main():
+    # Клиент без авторизации
+    async with Shikimori("APP_NAME") as api:
+        clubs = await api.request("/api/clubs", params={
+            "search": "Детектив Конан"
+        })
+        print(clubs)
+
+    # Клиент с авторизацией
+    # Метод open() можно не писать, если клиент без авторизации
+    api = await Shikimori("APP_NAME", "CLIENT_ID", "CLIENT_SECRET").open()
+    # Отправляем запросы
+    # await api.request(...)
+    # ...
+    await api.close()
+
+
+asyncio.run(main())
 ```
-По умолчанию клиент сохраняет токены авторизации в файле конфигурации INI, но при инициализации можно выбрать другой вариант хранения токенов, либо создать свой вариант унаследовав базовый класс и переопределив его методы.
+### Сохранение токенов авторизации
+По умолчанию клиент сохраняет токены авторизации в файле .env, но при инициализации можно выбрать другой вариант хранения токенов, либо создать свой вариант унаследовав базовый класс и переопределив его методы.
 ```python
-from shiki4py import Client
+from shiki4py import Shikimori
 from shiki4py.store import BaseTokenStore
-from shiki4py.store.env import EnvTokenStore
+from shiki4py.store.memory import MemoryTokenStore
 
 
 class MyTokenStore(BaseTokenStore):
     ...
 
 
-client = Client('APP_NAME',
+api = Shikimori('APP_NAME',
                 'CLIENT_ID',
                 'CLIENT_SECRET',
-                #store=EnvTokenStore()
-                store=MyTokenStore())
+                # store=MyTokenStore()
+                store=MemoryTokenStore())
+await api.open()
 ```
 
 ## Зависимости
-Обязательные:
-* [requests](https://github.com/psf/requests) [>=2.20] - для HTTP запросов
-* [requests-ratelimiter](https://github.com/JWCook/requests-ratelimiter) [>=0.3.1] - для ограничения количества запросов
-
-Дополнительные:
-* [python-dotenv](https://github.com/theskumar/python-dotenv) [>=0.20.0] - при иморте `shiki4py.store.env` для сохранения токенов авторизации в переменные среды
+* [aiohttp](https://github.com/aio-libs/aiohttp) - для асинхронных HTTP запросов
+* [PyrateLimiter](https://github.com/vutran1710/PyrateLimiter) - для ограничения частоты запросов
+* [python-dotenv](https://github.com/theskumar/python-dotenv) - для сохранения токенов авторизации в `.env` файл

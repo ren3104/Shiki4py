@@ -8,11 +8,12 @@
 
 Сравнение shiki4py v0.2.2 и v2.0.0 по времени отправки 25 запросов:
 
-<img alt="Image shiki4py sync vs async" src="./assets/sync_vs_async.svg" width="320">
+<img alt="Shiki4py sync vs async" src="https://raw.githubusercontent.com/ren3104/Shiki4py/main/assets/sync_vs_async.svg" width="500">
 
 shiki4py v0.2.2 ~10.5 секунд
 <details>
 <summary>Код</summary>
+
 ```python
 from shiki4py import Client
 
@@ -28,14 +29,15 @@ for i in range(25):
 shiki4py v2.0.0 ~5.07 секунд
 <details>
 <summary>Код</summary>
+
 ```python
 from shiki4py import Shikimori
 import asyncio
 
 
 async def main():
-    async with Shikimori("APP_NAME", "CLIENT_ID", "CLIENT_SECRET") as api:
-        await asyncio.gather(*[api.request(f"/api/users/{i}/info") for i in range(25)])
+async with Shikimori("APP_NAME", "CLIENT_ID", "CLIENT_SECRET") as api:
+    await asyncio.gather(*[api.request(f"/api/users/{i}/info") for i in range(25)])
 
 
 asyncio.run(main())

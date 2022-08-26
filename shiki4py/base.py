@@ -65,7 +65,7 @@ class Client:
     async def request(
         self, url: str, method: str = hdrs.METH_GET, **kwargs
     ) -> Dict[str, Any]:
-        if self._check_access_token():
+        if url != self._token_url and self._check_access_token():
             await self._refresh_access_token()
 
         try:
@@ -115,13 +115,14 @@ class Client:
             },
         )
         self._store.save(self._client_id, token)
-        self._apply_access_token(token)
         log.info(f"Get access token for {self._client_id}")
+        self._apply_access_token(token)
 
     async def _refresh_access_token(self) -> None:
         cur_token = self._store.fetch(self._client_id)
         if cur_token:
-            new_token = self.request(
+            self._session.headers.pop("Authorization")
+            new_token = await self.request(
                 self._token_url,
                 hdrs.METH_POST,
                 data={
@@ -132,8 +133,8 @@ class Client:
                 },
             )
             self._store.save(self._client_id, new_token)
-            self._apply_access_token(new_token)
             log.info(f"Refresh access token for {self._client_id}")
+            self._apply_access_token(new_token)
 
     def _apply_access_token(self, token: Dict[str, Any]) -> None:
         self._session.headers.update(

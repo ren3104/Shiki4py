@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Shiki4py"
-version = "2.0.0"
+version = "2.0.1"
 description = "Asynchronous client for api Shikimori written in Python 3.7 with asyncio and aiohttp."
 authors = ["ren3104 <2ren3104@gmail.com>"]
 license = "MIT"

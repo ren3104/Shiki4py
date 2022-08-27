@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import textwrap
 from datetime import datetime as dt
-from typing import Any, Dict, MutableMapping, Optional
+from typing import Any, Dict, MutableMapping, Optional, Union
 
 from aiohttp import ClientError, ClientSession, hdrs
 from pyrate_limiter import Duration, Limiter, RequestRate
@@ -74,7 +74,7 @@ class Client:
     @_base_limiter.ratelimit("base_shikimori", delay=True)
     async def request(
         self, url: str, method: str = hdrs.METH_GET, **kwargs
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[Union[Dict[str, Any], str]]:
         if self.closed:
             return
 
@@ -109,7 +109,10 @@ class Client:
 
         log.info(f"{resp.method} {resp.status} {resp.url}")
 
-        return await resp.json()
+        if resp.content_type == "application/json":
+            return await resp.json()
+        else:
+            return await resp.text()
 
     def _formatHeaders(self, d: MutableMapping) -> str:
         return "\n".join(f"{k}: {v}" for k, v in d.items())

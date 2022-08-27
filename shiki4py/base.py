@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-# import asyncio
 import logging
 import textwrap
 from datetime import datetime as dt
@@ -30,41 +29,55 @@ class Client:
         token_url: str = "/oauth/token",
         redirect_uri: str = "urn:ietf:wg:oauth:2.0:oob",
     ) -> None:
+        self._app_name = app_name
         self._client_id = client_id
         self._client_secret = client_secret
 
         self._store = store
 
+        self._base_url = base_url
         self._token_url = token_url
         self._redirect_uri = redirect_uri
 
-        self._session = ClientSession(base_url)
-        self._session.headers.update(
-            {
-                "User-Agent": app_name,
-                "Accept": "application/json, text/plain, */*",
-            }
-        )
+        self._session = None
+
+    @property
+    def closed(self) -> bool:
+        return self._session == None
 
     async def open(self) -> Client:
-        if self._client_id and self._client_secret:
-            if not self._store:
-                self._store = EnvTokenStore()
+        if self.closed:
+            self._session = ClientSession(self._base_url)
+            self._session.headers.update(
+                {
+                    "User-Agent": self._app_name,
+                    "Accept": "application/json, text/plain, */*",
+                }
+            )
 
-            cur_token = self._store.fetch(self._client_id)
-            if cur_token:
-                self._apply_access_token(cur_token)
-            else:
-                await self._get_access_token()
+            if self._client_id and self._client_secret:
+                if not self._store:
+                    self._store = EnvTokenStore()
+
+                cur_token = self._store.fetch(self._client_id)
+                if cur_token:
+                    self._apply_access_token(cur_token)
+                else:
+                    await self._get_access_token()
         return self
 
     async def close(self) -> None:
-        await self._session.close()
+        if not self.closed:
+            await self._session.close()
+            self._session = None
 
     @_base_limiter.ratelimit("base_shikimori", delay=True)
     async def request(
         self, url: str, method: str = hdrs.METH_GET, **kwargs
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
+        if self.closed:
+            return
+
         if url != self._token_url and self._check_access_token():
             await self._refresh_access_token()
 

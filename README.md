@@ -36,8 +36,8 @@ import asyncio
 
 
 async def main():
-async with Shikimori("APP_NAME", "CLIENT_ID", "CLIENT_SECRET") as api:
-    await asyncio.gather(*[api.request(f"/api/users/{i}/info") for i in range(25)])
+    async with Shikimori("APP_NAME", "CLIENT_ID", "CLIENT_SECRET") as api:
+        await asyncio.gather(*[api.request(f"/api/users/{i}/info") for i in range(25)])
 
 
 asyncio.run(main())
@@ -77,8 +77,10 @@ async def main():
         print(clubs)
 
     # Клиент с авторизацией
-    # Метод open() можно не писать, если клиент без авторизации
-    api = await Shikimori("APP_NAME", "CLIENT_ID", "CLIENT_SECRET").open()
+    api = Shikimori('APP_NAME',
+                    'CLIENT_ID',
+                    'CLIENT_SECRET')
+    await api.open()
     # Отправляем запросы
     # await api.request(...)
     # ...

@@ -1,16 +1,14 @@
-from shiki4py.base import Client
+from shiki4py.resources.base_resource import BaseResource
 from shiki4py.types.comment import Comment
+from shiki4py.utils import prepare_params, prepare_json
 from typing import Optional, List
 from aiohttp import hdrs
 from pyrate_limiter import Limiter, RequestRate
 
 
-class Comments:
+class Comments(BaseResource):
     _comments_limiter = Limiter(RequestRate(1, 3))
 
-    def __init__(self, client: Client) -> None:
-        self._client = client
-    
     async def show_one(self, comment_id: int) -> Comment:
         resp = await self._client.request(f"/api/comments/{comment_id}")
         return Comment(**resp)
@@ -23,13 +21,13 @@ class Comments:
         limit: Optional[int] = None,
         desc: Optional[int] = None
     ) -> List[Comment]:
-        resp = await self._client.request("/api/comments", params={
-            "commentable_id": commentable_id,
-            "commentable_type": commentable_type,
-            "page": page,
-            "limit": limit,
-            "desc": desc
-        })
+        resp = await self._client.request("/api/comments", params=prepare_params(
+            commentable_id=commentable_id,
+            commentable_type=commentable_type,
+            page=page,
+            limit=limit,
+            desc=desc
+        ))
         return [Comment(**item) for item in resp]
     
     @_comments_limiter.ratelimit("comments_shikimori", delay=True)
@@ -41,7 +39,7 @@ class Comments:
         is_offtopic: Optional[bool] = None,
         broadcast: Optional[bool] = None,
     ) -> Comment:
-        resp = await self._client.request("", hdrs.METH_POST, json={
+        resp = await self._client.request("/api/comments", hdrs.METH_POST, json=prepare_json({
             "comment": {
                 "body": body,
                 "commentable_id": commentable_id,
@@ -49,17 +47,19 @@ class Comments:
                 "is_offtopic": is_offtopic
             },
             "broadcast": broadcast
-        })
+        }))
         return Comment(**resp)
     
     async def update(self, comment_id: int, body: str) -> Comment:
-        resp = await self._client.request(f"/api/comments/{comment_id}", hdrs.METH_PATCH, json={
+        resp = await self._client.request(f"/api/comments/{comment_id}", hdrs.METH_PATCH, json=prepare_json({
             "comment": {
                 "body": body
             }
-        })
+        }))
         return Comment(**resp)
     
-    async def delete(self, comment_id: int) -> None:
+    async def delete(self, comment_id: int) -> bool:
         resp = await self._client.request(f"/api/comments/{comment_id}", hdrs.METH_DELETE)
-        print(resp)
+        if "notice" in resp:
+            return True
+        return False

@@ -13,13 +13,13 @@ def prepare_params(**params: Dict[str, Any]) -> Dict[str, Any]:
     return cleared_params
 
 
-def prepare_json(**json: Dict[str, Any]) -> Dict[str, Any]:
+def prepare_json(json: Dict[str, Any]) -> Dict[str, Any]:
     cleared_json = dict()
     for key, value in json.items():
         if value == None:
             continue
         elif isinstance(value, dict):
-            nested_cleared_json = prepare_json(**value)
+            nested_cleared_json = prepare_json(value)
             if len(nested_cleared_json) > 0:
                 cleared_json[key] = nested_cleared_json
         else:

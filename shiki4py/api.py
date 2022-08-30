@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional
 from shiki4py.base import Client
 from shiki4py.store import BaseTokenStore
-from shiki4py.resources.comments import Comments
+from shiki4py.resources import *
 
 
 class Shikimori:
@@ -20,7 +20,8 @@ class Shikimori:
             app_name, client_id, client_secret, store, base_url, token_url, redirect_uri
         )
         self.comments = Comments(self.client)
-    
+        self.users = Users(self.client)
+
     @property
     def closed(self) -> bool:
         return self.client.closed
@@ -28,10 +29,10 @@ class Shikimori:
     async def open(self) -> Shikimori:
         await self.client.open()
         return self
-    
+
     async def close(self) -> None:
         await self.client.close()
-    
+
     async def __aenter__(self) -> Shikimori:
         return self.open()
 

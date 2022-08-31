@@ -1,4 +1,7 @@
-from typing import Any, Dict
+import functools
+import asyncio
+from random import uniform
+from typing import Sequence, Union, Optional, Any, Dict
 
 
 def prepare_params(**params: Dict[str, Any]) -> Dict[str, Any]:
@@ -25,3 +28,43 @@ def prepare_json(json: Dict[str, Any]) -> Dict[str, Any]:
         else:
             cleared_json[key] = value
     return cleared_json
+
+
+def retry_backoff(
+    exceptions: Union[Exception, Sequence[Exception]],
+    base_value: int = 1,
+    max_time: Optional[int] = None,
+    max_attempts: Optional[int] = None,
+    jitter: bool = True,
+):
+    def decorator(callback):
+        @functools.wraps(callback)
+        async def wrapper(*args, **kwargs):
+            attempt = 0
+            while True:
+                attempt += 1
+
+                if max_attempts != None and attempt > max_attempts:
+                    attempt = max_attempts
+
+                try:
+                    ret = await callback(*args, **kwargs)
+                except exceptions as err:
+                    print(f"Retry for {type(err).__name__}")
+
+                    seconds = base_value * 2**attempt
+
+                    if max_time != None and seconds > max_time:
+                        seconds = max_time
+
+                    if jitter:
+                        half_seconds = seconds / 2
+                        seconds = int(half_seconds + round(uniform(0, half_seconds), 1))
+
+                    await asyncio.sleep(seconds)
+                else:
+                    return ret
+
+        return wrapper
+
+    return decorator

@@ -10,6 +10,8 @@ from pyrate_limiter import Duration, Limiter, RequestRate
 
 from shiki4py.store import BaseTokenStore
 from shiki4py.store.env import EnvTokenStore
+from shiki4py.exceptions import TooManyRequests
+from shiki4py.utils import retry_backoff
 
 log = logging.getLogger("shiki4py")
 
@@ -71,6 +73,7 @@ class Client:
             await self._session.close()
             self._session = None
 
+    @retry_backoff(TooManyRequests, max_time=5)
     @_base_limiter.ratelimit("base_shikimori", delay=True)
     async def request(
         self, url: str, method: str = hdrs.METH_GET, **kwargs
@@ -83,7 +86,10 @@ class Client:
 
         try:
             resp = await self._session.request(method, url, **kwargs)
-            resp.raise_for_status()
+            if resp.status == 429:
+                raise TooManyRequests()
+            else:
+                resp.raise_for_status()
         except ClientError as e:
             await self.close()
             log.error(

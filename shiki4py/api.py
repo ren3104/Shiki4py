@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 from typing import Optional
+
 from shiki4py.base import Client
-from shiki4py.store import BaseTokenStore
 from shiki4py.resources import *
+from shiki4py.store import BaseTokenStore
 
 
 class Shikimori:

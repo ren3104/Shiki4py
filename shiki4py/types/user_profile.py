@@ -1,7 +1,9 @@
-from shiki4py.types.user import User
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
+
 from attrs import define, field
+
+from shiki4py.types.user import User
 
 
 @define

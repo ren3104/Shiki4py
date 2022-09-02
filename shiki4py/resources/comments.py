@@ -1,9 +1,11 @@
-from shiki4py.resources.base_resource import BaseResource
-from shiki4py.types.comment import Comment
-from shiki4py.utils import prepare_params, prepare_json
-from typing import Optional, List
+from typing import List, Optional
+
 from aiohttp import hdrs
 from pyrate_limiter import Limiter, RequestRate
+
+from shiki4py.resources.base_resource import BaseResource
+from shiki4py.types.comment import Comment
+from shiki4py.utils import prepare_json, prepare_params
 
 
 class Comments(BaseResource):

@@ -1,8 +1,10 @@
-from shiki4py.types.user import User
 from datetime import datetime
 from typing import Optional
+
 from attrs import define, field
 from attrs.converters import optional
+
+from shiki4py.types.user import User
 
 
 @define

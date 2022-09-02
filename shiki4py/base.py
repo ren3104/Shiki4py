@@ -8,9 +8,9 @@ from typing import Any, Dict, MutableMapping, Optional, Union
 from aiohttp import ClientError, ClientSession, hdrs
 from pyrate_limiter import Duration, Limiter, RequestRate
 
+from shiki4py.exceptions import TooManyRequests
 from shiki4py.store import BaseTokenStore
 from shiki4py.store.env import EnvTokenStore
-from shiki4py.exceptions import TooManyRequests
 from shiki4py.utils import retry_backoff
 
 log = logging.getLogger("shiki4py")

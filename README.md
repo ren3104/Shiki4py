@@ -49,8 +49,9 @@ asyncio.run(main())
 * Ограничения 5rps и 90rpm
 * OAuth2 авторизация
 * Контроль срока действия токена
-* Хранение токенов в .env файле
-* Функция безопасного создания комментариев
+* Хранение токенов в `.env` файле
+* Свой класс с методами для каждого ресурса api
+* Представление json данных в python классах
 
 ## Установка
 ```bash
@@ -71,18 +72,18 @@ logging.basicConfig(level=logging.INFO)
 async def main():
     # Клиент без авторизации
     async with Shikimori("APP_NAME") as api:
-        clubs = await api.request("/api/clubs", params={
-            "search": "Детектив Конан"
-        })
+        clubs = await api.users.clubs(555400)
         print(clubs)
 
     # Клиент с авторизацией
-    api = Shikimori('APP_NAME',
-                    'CLIENT_ID',
-                    'CLIENT_SECRET')
+    api = Shikimori("APP_NAME",
+                    "CLIENT_ID",
+                    "CLIENT_SECRET")
     await api.open()
     # Отправляем запросы
-    # await api.request(...)
+    # await api.client.request(...)
+    # await api.users.favourites(...)
+    # await api.comments.show_one(...)
     # ...
     await api.close()
 
@@ -101,15 +102,16 @@ class MyTokenStore(BaseTokenStore):
     ...
 
 
-api = Shikimori('APP_NAME',
-                'CLIENT_ID',
-                'CLIENT_SECRET',
+api = Shikimori("APP_NAME",
+                "CLIENT_ID",
+                "CLIENT_SECRET",
                 # store=MyTokenStore()
                 store=MemoryTokenStore())
-await api.open()
 ```
 
 ## Зависимости
-* [aiohttp](https://github.com/aio-libs/aiohttp) - для асинхронных HTTP запросов
+* [aiohttp](https://github.com/aio-libs/aiohttp) - для асинхронных http запросов
 * [PyrateLimiter](https://github.com/vutran1710/PyrateLimiter) - для ограничения частоты запросов
+* [attrs](https://github.com/python-attrs/attrs) - для преобразования данных json в python классы
+* [cattrs](https://github.com/python-attrs/cattrs) - дополнение к attrs для структурирования и деструктурирования данных
 * [python-dotenv](https://github.com/theskumar/python-dotenv) - для сохранения токенов авторизации в `.env` файл

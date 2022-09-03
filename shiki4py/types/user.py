@@ -19,6 +19,6 @@ class User:
     id: int
     nickname: str
     avatar: str
-    image: Image = field(converter=lambda d: Image(**d))
-    last_online_at: datetime = field(converter=datetime.fromisoformat, repr=str)
+    image: Image
+    last_online_at: datetime = field(repr=str)
     url: str

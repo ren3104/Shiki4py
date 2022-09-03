@@ -1,4 +1,4 @@
-from attrs import define, field
+from attrs import define
 
 
 @define
@@ -14,7 +14,7 @@ class Image:
 class Club:
     id: int
     name: str
-    logo: Image = field(converter=lambda d: Image(**d))
+    logo: Image
     is_censored: bool
     join_policy: str
     comment_policy: str

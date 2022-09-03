@@ -1,19 +1,14 @@
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 
 from attrs import define, field
-from attrs.converters import optional
+from cattr.gen import make_dict_structure_fn, override
+from cattrs import global_converter
 
 from shiki4py.types.anime import Anime
 from shiki4py.types.linked_topic import LinkedTopic
+from shiki4py.types.manga import Manga
 from shiki4py.types.user import User
-
-
-def message_linked(linked: Dict[str, Any]) -> Union[Anime, LinkedTopic]:
-    try:
-        return Anime(**linked)
-    except TypeError:
-        return LinkedTopic(**linked)
 
 
 @define
@@ -23,16 +18,20 @@ class Message:
     read: bool
     body: str
     html_body: str
-    created_at: datetime = field(converter=datetime.fromisoformat, repr=str)
+    created_at: datetime = field(repr=str)
     linked_id: int
     linked_type: Optional[str]
-    linked: Optional[Union[Anime, LinkedTopic]] = field(
-        converter=optional(message_linked)
-    )
-    from_user: User = field(converter=lambda d: User(**d))
-    to_user: User = field(converter=lambda d: User(**d))
+    linked: Optional[Union[Anime, Manga, LinkedTopic]]
+    from_user: User
+    to_user: User
 
-    def __init__(self, **kwargs):
-        kwargs["from_user"] = kwargs.pop("from")
-        kwargs["to_user"] = kwargs.pop("to")
-        self.__attrs_init__(**kwargs)
+
+global_converter.register_structure_hook(
+    Message,
+    make_dict_structure_fn(
+        Message,
+        global_converter,
+        from_user=override(rename="from"),
+        to_user=override(rename="to"),
+    ),
+)

@@ -12,7 +12,7 @@ class UserProfile(User):
     sex: Optional[str]
     full_years: Optional[int]
     last_online: str
-    last_online_at: datetime = field(converter=datetime.fromisoformat, repr=str)
+    last_online_at: datetime = field(repr=str)
     website: Optional[str]
     location: Optional[str]
     banned: bool

@@ -1,10 +1,11 @@
 from typing import List, Optional
 
+import cattrs
 from aiohttp import hdrs
 from pyrate_limiter import Limiter, RequestRate
 
 from shiki4py.resources.base_resource import BaseResource
-from shiki4py.types.comment import Comment
+from shiki4py.types import Comment
 from shiki4py.utils import prepare_json, prepare_params
 
 
@@ -13,7 +14,7 @@ class Comments(BaseResource):
 
     async def show_one(self, comment_id: int) -> Comment:
         resp = await self._client.request(f"/api/comments/{comment_id}")
-        return Comment(**resp)
+        return cattrs.structure(resp, Comment)
 
     async def show_part(
         self,
@@ -33,7 +34,7 @@ class Comments(BaseResource):
                 desc=desc,
             ),
         )
-        return [Comment(**item) for item in resp]
+        return [cattrs.structure(resp, Comment) for item in resp]
 
     @_comments_limiter.ratelimit("comments_shikimori", delay=True)
     async def create(
@@ -59,7 +60,7 @@ class Comments(BaseResource):
                 }
             ),
         )
-        return Comment(**resp)
+        return cattrs.structure(resp, Comment)
 
     async def update(self, comment_id: int, body: str) -> Comment:
         resp = await self._client.request(
@@ -67,7 +68,7 @@ class Comments(BaseResource):
             hdrs.METH_PATCH,
             json=prepare_json({"comment": {"body": body}}),
         )
-        return Comment(**resp)
+        return cattrs.structure(resp, Comment)
 
     async def delete(self, comment_id: int) -> bool:
         resp = await self._client.request(

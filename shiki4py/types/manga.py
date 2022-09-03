@@ -1,8 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 from typing import Optional
 
 from attrs import define, field
-from attrs.converters import optional
 
 
 @define
@@ -18,16 +17,12 @@ class Manga:
     id: int
     name: str
     russian: str
-    image: Image = field(converter=lambda d: Image(**d))
+    image: Image
     url: str
     kind: str
-    score: float = field(converter=float)
+    score: float
     status: str
     volumes: int
     chapters: int
-    aired_on: Optional[date] = field(
-        converter=optional(lambda s: datetime.strptime(s, "%Y-%m-%d").date()), repr=str
-    )
-    released_on: Optional[date] = field(
-        converter=optional(lambda s: datetime.strptime(s, "%Y-%m-%d").date()), repr=str
-    )
+    aired_on: Optional[date] = field(repr=str)
+    released_on: Optional[date] = field(repr=str)

@@ -1,33 +1,42 @@
-from typing import Any, Dict
+from __future__ import annotations
 
-from aiohttp import hdrs
-from pyrate_limiter import Limiter, RequestRate
+from typing import Optional
 
 from shiki4py.base import Client
+from shiki4py.resources import *
+from shiki4py.store import BaseTokenStore
 
 
-class Shikimori(Client):
-    _comments_limiter = Limiter(RequestRate(1, 4))
-
-    @_comments_limiter.ratelimit("comments_shikimori", delay=True)
-    def create_comment(
+class Shikimori:
+    def __init__(
         self,
-        body: str,
-        commentable_id: int,
-        commentable_type: str,
-        is_offtopic: bool = False,
-        broadcast: bool = False,
-    ) -> Dict[str, Any]:
-        return self.request(
-            "/api/comments",
-            hdrs.METH_POST,
-            json={
-                "comment": {
-                    "body": body,
-                    "commentable_id": commentable_id,
-                    "commentable_type": commentable_type,
-                    "is_offtopic": is_offtopic,
-                },
-                "broadcast": broadcast,
-            },
+        app_name: str,
+        client_id: Optional[str] = None,
+        client_secret: Optional[str] = None,
+        store: Optional[BaseTokenStore] = None,
+        base_url: str = "https://shikimori.one",
+        token_url: str = "/oauth/token",
+        redirect_uri: str = "urn:ietf:wg:oauth:2.0:oob",
+    ) -> None:
+        self.client = Client(
+            app_name, client_id, client_secret, store, base_url, token_url, redirect_uri
         )
+        self.comments = Comments(self.client)
+        self.users = Users(self.client)
+
+    @property
+    def closed(self) -> bool:
+        return self.client.closed
+
+    async def open(self) -> Shikimori:
+        await self.client.open()
+        return self
+
+    async def close(self) -> None:
+        await self.client.close()
+
+    async def __aenter__(self) -> Shikimori:
+        return self.open()
+
+    async def __aexit__(self, *args) -> None:
+        await self.close()

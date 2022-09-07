@@ -3,9 +3,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ren3104/Shiki4py/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/ren3104/Shiki4py"></a>
+  <a href="https://github.com/ren3104/Shiki4py/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ren3104/Shiki4py" alt="GitHub license"></a>
   <a href="https://pypi.org/project/shiki4py"><img src="https://img.shields.io/pypi/v/shiki4py?color=blue" alt="PyPi package version"></a>
   <a href="https://pypi.org/project/shiki4py"><img src="https://img.shields.io/pypi/pyversions/shiki4py.svg" alt="Supported python versions"></a>
+  <img src="https://img.shields.io/github/repo-size/ren3104/shiki4py" alt="GitHub repo size">
 </p>
 
 Асинхронный клиент для взаимодействия с [api Shikimori](https://shikimori.one/api/doc/1.0), написанный на Python 3.7 c использованием [asyncio](https://docs.python.org/3/library/asyncio.html) и [aiohttp](https://github.com/aio-libs/aiohttp).

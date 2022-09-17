@@ -7,6 +7,7 @@
   <a href="https://pypi.org/project/shiki4py"><img src="https://img.shields.io/pypi/v/shiki4py?color=blue" alt="PyPi package version"></a>
   <a href="https://pypi.org/project/shiki4py"><img src="https://img.shields.io/pypi/pyversions/shiki4py.svg" alt="Supported python versions"></a>
   <img src="https://img.shields.io/github/repo-size/ren3104/shiki4py" alt="GitHub repo size">
+  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
 </p>
 
 Асинхронный клиент для взаимодействия с [api Shikimori](https://shikimori.one/api/doc/1.0), написанный на Python 3.7 c использованием [asyncio](https://docs.python.org/3/library/asyncio.html) и [aiohttp](https://github.com/aio-libs/aiohttp).

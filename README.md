@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/shiki4py_logo.svg" alt="Shiki4py" width="35%">
+  <img src="./assets/shiki4py_logo_v2.jpg" alt="Shiki4py" width="50%">
 </p>
 
 <p align="center">

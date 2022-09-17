@@ -1,7 +1,10 @@
 import asyncio
 import functools
+import logging
 from random import uniform
 from typing import Any, Dict, Optional, Sequence, Union
+
+log = logging.getLogger("shiki4py")
 
 
 def prepare_params(**params: Dict[str, Any]) -> Dict[str, Any]:
@@ -50,7 +53,7 @@ def retry_backoff(
                 try:
                     ret = await callback(*args, **kwargs)
                 except exceptions as err:
-                    print(f"Retry for {type(err).__name__}")
+                    log.info(f"Retry for {type(err).__name__}")
 
                     seconds = base_value * 2**attempt
 

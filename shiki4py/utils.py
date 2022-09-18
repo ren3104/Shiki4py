@@ -2,27 +2,35 @@ import asyncio
 import functools
 import logging
 from random import uniform
-from typing import Any, Dict, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 log = logging.getLogger("shiki4py")
 
 
 def prepare_params(**params: Dict[str, Any]) -> Dict[str, Any]:
-    cleared_params = dict()
+    cleared_params = {}
     for key, value in params.items():
-        if value == None:
+        if value is None:
             continue
         elif isinstance(value, bool):
             cleared_params[key] = int(value)
+        elif isinstance(value, list):
+            grouped_data: List[str] = []
+            for item in value:
+                if isinstance(item, str):
+                    grouped_data.append(item)
+                else:
+                    grouped_data.append(str(item))
+            cleared_params[key] = ",".join(grouped_data)
         else:
             cleared_params[key] = value
     return cleared_params
 
 
 def prepare_json(json: Dict[str, Any]) -> Dict[str, Any]:
-    cleared_json = dict()
+    cleared_json = {}
     for key, value in json.items():
-        if value == None:
+        if value is None:
             continue
         elif isinstance(value, dict):
             nested_cleared_json = prepare_json(value)

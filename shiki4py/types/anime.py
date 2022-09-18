@@ -5,7 +5,7 @@ from attrs import define, field
 
 
 @define
-class Image:
+class AnimeAvatar:
     original: str
     preview: str
     x96: str
@@ -17,9 +17,9 @@ class Anime:
     id: int
     name: str
     russian: str
-    image: Image
+    image: AnimeAvatar
     url: str
-    kind: str
+    kind: Optional[str]
     score: float
     status: str
     episodes: int

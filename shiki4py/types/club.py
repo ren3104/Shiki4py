@@ -2,7 +2,7 @@ from attrs import define
 
 
 @define
-class Image:
+class ClubAvatar:
     original: str
     main: str
     x96: str
@@ -14,7 +14,7 @@ class Image:
 class Club:
     id: int
     name: str
-    logo: Image
+    logo: ClubAvatar
     is_censored: bool
     join_policy: str
     comment_policy: str

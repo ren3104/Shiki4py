@@ -21,6 +21,7 @@ class Shikimori:
         self.client = Client(
             app_name, client_id, client_secret, store, base_url, token_url, redirect_uri
         )
+        self.animes = Animes(self.client)
         self.comments = Comments(self.client)
         self.users = Users(self.client)
 
@@ -36,7 +37,7 @@ class Shikimori:
         await self.client.close()
 
     async def __aenter__(self) -> Shikimori:
-        return self.open()
+        return await self.open()
 
     async def __aexit__(self, *args) -> None:
         await self.close()

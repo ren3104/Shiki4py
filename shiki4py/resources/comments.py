@@ -34,7 +34,7 @@ class Comments(BaseResource):
                 desc=desc,
             ),
         )
-        return [cattrs.structure(resp, Comment) for item in resp]
+        return [cattrs.structure(item, Comment) for item in resp]
 
     @_comments_limiter.ratelimit("comments_shikimori", delay=True)
     async def create(

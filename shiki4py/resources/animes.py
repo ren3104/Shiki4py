@@ -1,7 +1,17 @@
 from typing import List, Optional, Union
 from cattrs import structure
 from shiki4py.resources.base_resource import BaseResource
-from shiki4py.types import Anime, AnimeProfile
+from shiki4py.types import (
+    Anime,
+    AnimeProfile,
+    PersonRole,
+    Relation,
+    Screenshot,
+    Video,
+    Franchise,
+    ExternalLink,
+    Topic,
+)
 from shiki4py.utils import prepare_params
 
 
@@ -54,29 +64,34 @@ class Animes(BaseResource):
         )
         return [structure(item, Anime) for item in resp]
 
-    # async def roles(self) -> None:
-    #     resp = await self._client.request("")
+    async def roles(self, anime_id: int) -> List[PersonRole]:
+        resp = await self._client.request(f"/api/animes/{anime_id}/roles")
+        return [structure(item, PersonRole) for item in resp]
 
-    # async def similar(self) -> None:
-    #     resp = await self._client.request("")
+    async def similar(self, anime_id: int) -> List[Anime]:
+        resp = await self._client.request(f"/api/animes/{anime_id}/similar")
+        return [structure(item, Anime) for item in resp]
 
-    # async def related(self) -> None:
-    #     resp = await self._client.request("")
+    async def related(self, anime_id: int) -> List[Relation]:
+        resp = await self._client.request(f"/api/animes/{anime_id}/related")
+        return [structure(item, Relation) for item in resp]
 
-    # async def screenshots(self) -> None:
-    #     resp = await self._client.request("")
+    async def screenshots(self, anime_id: int) -> List[Screenshot]:
+        resp = await self._client.request(f"/api/animes/{anime_id}/screenshots")
+        return [structure(item, Screenshot) for item in resp]
 
-    # async def videos(self) -> None:
-    #     resp = await self._client.request("")
+    async def videos(self, anime_id: int) -> List[Video]:
+        resp = await self._client.request(f"/api/animes/{anime_id}/videos")
+        return [structure(item, Video) for item in resp]
 
-    # async def franchise(self) -> None:
-    #     resp = await self._client.request("")
+    async def franchise(self, anime_id: int) -> Franchise:
+        resp = await self._client.request(f"/api/animes/{anime_id}/franchise")
+        return structure(resp, Franchise)
 
-    # async def external_links(self) -> None:
-    #     resp = await self._client.request("")
+    async def external_links(self, anime_id: int) -> List[ExternalLink]:
+        resp = await self._client.request(f"/api/animes/{anime_id}/external_links")
+        return [structure(item, ExternalLink) for item in resp]
 
-    # async def search(self) -> None:
-    #     resp = await self._client.request("")
-
-    # async def topics(self) -> None:
-    #     resp = await self._client.request("")
+    async def topics(self, anime_id: int) -> List[Topic]:
+        resp = await self._client.request(f"/api/animes/{anime_id}/topics")
+        return [structure(item, Topic) for item in resp]

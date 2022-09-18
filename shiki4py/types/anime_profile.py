@@ -1,8 +1,10 @@
+from datetime import datetime
+from typing import List, Optional
+
 from attrs import define, field
+
 from shiki4py.types.anime import Anime
 from shiki4py.types.user_rate_full import UserRateFull
-from datetime import datetime
-from typing import Optional, List
 
 
 @define

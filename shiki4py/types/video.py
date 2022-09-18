@@ -1,5 +1,6 @@
-from attrs import define
 from typing import Optional
+
+from attrs import define
 
 
 @define

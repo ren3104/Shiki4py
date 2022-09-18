@@ -1,5 +1,7 @@
-from attrs import define
 from typing import Optional
+
+from attrs import define
+
 from shiki4py.types.anime import Anime
 from shiki4py.types.manga import Manga
 

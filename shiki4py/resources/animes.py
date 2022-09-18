@@ -1,16 +1,18 @@
 from typing import List, Optional, Union
+
 from cattrs import structure
+
 from shiki4py.resources.base_resource import BaseResource
 from shiki4py.types import (
     Anime,
     AnimeProfile,
+    ExternalLink,
+    Franchise,
     PersonRole,
     Relation,
     Screenshot,
-    Video,
-    Franchise,
-    ExternalLink,
     Topic,
+    Video,
 )
 from shiki4py.utils import prepare_params
 

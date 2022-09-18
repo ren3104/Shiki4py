@@ -1,5 +1,5 @@
-from shiki4py.types.anime_profile import AnimeProfile
 from shiki4py.types.anime import Anime
+from shiki4py.types.anime_profile import AnimeProfile
 from shiki4py.types.ban import Ban
 from shiki4py.types.club import Club
 from shiki4py.types.comment import Comment

@@ -1,5 +1,6 @@
-from attrs import define
 from typing import List
+
+from attrs import define
 
 
 @define

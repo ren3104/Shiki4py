@@ -1,9 +1,11 @@
-from attrs import define, field
 from datetime import datetime
-from shiki4py.types.user import User
+from typing import Union
+
+from attrs import define, field
+
 from shiki4py.types.anime import Anime
 from shiki4py.types.manga import Manga
-from typing import Union
+from shiki4py.types.user import User
 
 
 @define

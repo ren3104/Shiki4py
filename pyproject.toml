@@ -7,9 +7,19 @@ license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/ren3104/Shiki4py"
 repository = "https://github.com/ren3104/Shiki4py"
+keywords = [
+    "api-client",
+    "aiohttp",
+    "asyncio",
+    "shikimori",
+    "anime"
+]
 packages = [
     { include = "shiki4py", from = "." }
 ]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/ren3104/shikibaio/issues"
 
 [tool.poetry.dependencies]
 python = "^3.7"

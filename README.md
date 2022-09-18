@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/shiki4py_logo_v2.jpg" alt="Shiki4py" width="50%">
+  <img src="https://raw.githubusercontent.com/ren3104/Shiki4py/main/assets/shiki4py_logo_v2.jpg" alt="Shiki4py" style="max-width:320px;width:100%">
 </p>
 
 <p align="center">
@@ -12,53 +12,22 @@
 
 Асинхронный клиент для взаимодействия с [api Shikimori](https://shikimori.one/api/doc/1.0), написанный на Python 3.7 c использованием [asyncio](https://docs.python.org/3/library/asyncio.html) и [aiohttp](https://github.com/aio-libs/aiohttp).
 
-Версии shiki4py v0.2.2 и раньше являются синхронными, но начиная с v2.0.0 этот пакет стал асинхронным. Рекомендую использовать в своих проектах только shiki4py >= v2.0.0!
-
-Сравнение shiki4py v0.2.2 и v2.0.0 по времени отправки 25 запросов:
-
-<img src="https://raw.githubusercontent.com/ren3104/Shiki4py/main/assets/sync_vs_async.svg" alt="Shiki4py sync vs async" width="500">
-
-shiki4py v0.2.2 ~10.5 секунд
-<details>
-<summary>Код</summary>
-
-```python
-from shiki4py import Client
-
-
-client = Client("APP_NAME",
-                "CLIENT_ID",
-                "CLIENT_SECRET")
-for i in range(25):
-    client.get(f"/users/{i}/info")
-```
-</details>
-
-shiki4py v2.0.0 ~5.07 секунд
-<details>
-<summary>Код</summary>
-
-```python
-from shiki4py import Shikimori
-import asyncio
-
-
-async def main():
-    async with Shikimori("APP_NAME", "CLIENT_ID", "CLIENT_SECRET") as api:
-        await asyncio.gather(*[api.users.info(i) for i in range(25)])
-
-
-asyncio.run(main())
-```
-</details>
+- [Особенности](#особенности)
+- [Установка](#установка)
+- [Использование](#использование)
+  - [Быстрый старт](#быстрый-старт)
+  - [Сохранение токенов авторизации](#сохранение-токенов-авторизации)
+- [Зависимости](#зависимости)
 
 ## Особенности
+* Асинхронность
 * Поддержка api v1 и v2
 * Ограничения 5rps и 90rpm
+* Повторная отправка запроса с экспоненциальной отсрочкой при ошибке 429
 * OAuth2 авторизация
 * Контроль срока действия токена
 * Хранение токенов в `.env` файле
-* Свой класс с методами для каждого ресурса api (пока только для `comments` и `users`)
+* Свой класс с методами для каждого ресурса api (пока только для `animes`, `comments`, `users`)
 * Представление json данных как python классы
 
 ## Установка

@@ -15,7 +15,7 @@ def prepare_params(**params: Dict[str, Any]) -> Dict[str, Any]:
         elif isinstance(value, bool):
             cleared_params[key] = int(value)
         elif isinstance(value, list):
-            grouped_data: List[str] = []
+            grouped_data = []
             for item in value:
                 if isinstance(item, str):
                     grouped_data.append(item)

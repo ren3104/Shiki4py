@@ -13,7 +13,7 @@ class Comments(BaseResource):
     _comments_limiter = Limiter(RequestRate(1, 3))
 
     async def show_one(self, comment_id: int) -> Comment:
-        resp = await self._client.request(f"/api/comments/{comment_id}")
+        resp = await self._request(f"/api/comments/{comment_id}")
         return cattrs.structure(resp, Comment)
 
     async def show_part(
@@ -24,7 +24,7 @@ class Comments(BaseResource):
         limit: Optional[int] = None,
         desc: Optional[int] = None,
     ) -> List[Comment]:
-        resp = await self._client.request(
+        resp = await self._request(
             "/api/comments",
             params=prepare_params(
                 commentable_id=commentable_id,
@@ -45,7 +45,7 @@ class Comments(BaseResource):
         is_offtopic: Optional[bool] = None,
         broadcast: Optional[bool] = None,
     ) -> Comment:
-        resp = await self._client.request(
+        resp = await self._request(
             "/api/comments",
             hdrs.METH_POST,
             json=prepare_json(
@@ -63,7 +63,7 @@ class Comments(BaseResource):
         return cattrs.structure(resp, Comment)
 
     async def update(self, comment_id: int, body: str) -> Comment:
-        resp = await self._client.request(
+        resp = await self._request(
             f"/api/comments/{comment_id}",
             hdrs.METH_PATCH,
             json=prepare_json({"comment": {"body": body}}),
@@ -71,9 +71,7 @@ class Comments(BaseResource):
         return cattrs.structure(resp, Comment)
 
     async def delete(self, comment_id: int) -> bool:
-        resp = await self._client.request(
-            f"/api/comments/{comment_id}", hdrs.METH_DELETE
-        )
+        resp = await self._request(f"/api/comments/{comment_id}", hdrs.METH_DELETE)
         if "notice" in resp:
             return True
         return False

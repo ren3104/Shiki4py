@@ -19,7 +19,7 @@ from shiki4py.utils import prepare_params
 
 class Animes(BaseResource):
     async def show_one(self, anime_id: int) -> AnimeProfile:
-        resp = await self._client.request(f"/api/animes/{anime_id}")
+        resp = await self._request(f"/api/animes/{anime_id}")
         return structure(resp, AnimeProfile)
 
     async def show_part(
@@ -42,7 +42,7 @@ class Animes(BaseResource):
         exclude_ids: Optional[Union[int, List[int]]] = None,
         search: Optional[str] = None,
     ) -> List[Anime]:
-        resp = await self._client.request(
+        resp = await self._request(
             "/api/animes",
             params=prepare_params(
                 page=page,
@@ -67,33 +67,33 @@ class Animes(BaseResource):
         return [structure(item, Anime) for item in resp]
 
     async def roles(self, anime_id: int) -> List[PersonRole]:
-        resp = await self._client.request(f"/api/animes/{anime_id}/roles")
+        resp = await self._request(f"/api/animes/{anime_id}/roles")
         return [structure(item, PersonRole) for item in resp]
 
     async def similar(self, anime_id: int) -> List[Anime]:
-        resp = await self._client.request(f"/api/animes/{anime_id}/similar")
+        resp = await self._request(f"/api/animes/{anime_id}/similar")
         return [structure(item, Anime) for item in resp]
 
     async def related(self, anime_id: int) -> List[Relation]:
-        resp = await self._client.request(f"/api/animes/{anime_id}/related")
+        resp = await self._request(f"/api/animes/{anime_id}/related")
         return [structure(item, Relation) for item in resp]
 
     async def screenshots(self, anime_id: int) -> List[Screenshot]:
-        resp = await self._client.request(f"/api/animes/{anime_id}/screenshots")
+        resp = await self._request(f"/api/animes/{anime_id}/screenshots")
         return [structure(item, Screenshot) for item in resp]
 
     async def videos(self, anime_id: int) -> List[Video]:
-        resp = await self._client.request(f"/api/animes/{anime_id}/videos")
+        resp = await self._request(f"/api/animes/{anime_id}/videos")
         return [structure(item, Video) for item in resp]
 
     async def franchise(self, anime_id: int) -> Franchise:
-        resp = await self._client.request(f"/api/animes/{anime_id}/franchise")
+        resp = await self._request(f"/api/animes/{anime_id}/franchise")
         return structure(resp, Franchise)
 
     async def external_links(self, anime_id: int) -> List[ExternalLink]:
-        resp = await self._client.request(f"/api/animes/{anime_id}/external_links")
+        resp = await self._request(f"/api/animes/{anime_id}/external_links")
         return [structure(item, ExternalLink) for item in resp]
 
     async def topics(self, anime_id: int) -> List[Topic]:
-        resp = await self._client.request(f"/api/animes/{anime_id}/topics")
+        resp = await self._request(f"/api/animes/{anime_id}/topics")
         return [structure(item, Topic) for item in resp]

@@ -32,7 +32,7 @@
 
 ## Установка
 ```bash
-pip install shiki4py
+pip install -U shiki4py
 ```
 
 ## Использование
@@ -58,7 +58,7 @@ async def main():
                     "CLIENT_SECRET")
     await api.open()
     # Отправляем запросы
-    # await api.client.request(...)
+    # await api.animes.similar(...)
     # await api.users.favourites(...)
     # await api.comments.show_one(...)
     # ...
